@@ -5,11 +5,18 @@ namespace Metadata_Artwork_Remover
 {
     internal static class Program
     {
+
         [STAThread]
         static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
+            if (!System.IO.File.Exists("TagLibSharp.dll"))
+            {
+                MessageBox.Show("TagLibSharp.dll file is missing.");
+                return;
+            }
 
             FolderBrowserDialog fbd = new FolderBrowserDialog
             {
@@ -19,23 +26,18 @@ namespace Metadata_Artwork_Remover
             if (fbd.ShowDialog() != DialogResult.OK) return;
 
             string[] Mp3Files = System.IO.Directory.GetFiles(fbd.SelectedPath, "*.mp3", System.IO.SearchOption.AllDirectories);
-            
-            foreach (string file in Mp3Files)
-                RemoveImageFromAudioFile(file);
 
-            MessageBox.Show($"لقد تمت العملية بنجاح.\nعدد الملفات: {Mp3Files.Length}");
-        }
-
-        public static void RemoveImageFromAudioFile(string mp3File)
-        {
-            if (System.IO.File.Exists(mp3File))
+            foreach (string path in Mp3Files)
             {
-                using (var file = TagLib.File.Create(mp3File))
+                using (var file = TagLib.File.Create(path))
                 {
                     file.Tag.Pictures = new TagLib.IPicture[0];
                     file.Save();
                 }
             }
+
+            MessageBox.Show($"تمت العملية بنجاح.\nعدد الملفات: {Mp3Files.Length}");
         }
+
     }
 }
